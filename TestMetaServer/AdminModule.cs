@@ -67,11 +67,14 @@ namespace TestMetaServer
             Get["/add-class-meta"] = _ =>
             {
                 this.RequiresAuthentication();
+
                 return View["admin/add-class-meta"];
             };
 
             Post["/add-class-meta", runAsync:true] = async (ctx, ct) =>
             {
+                this.RequiresAuthentication();
+
                 var metaId = (string)this.Request.Form.metaId;
                 var name = (string)this.Request.Form.name;
                 var desc = (string)this.Request.Form.description;
@@ -118,6 +121,8 @@ namespace TestMetaServer
 
             Post["/delete-class-meta", runAsync: true] = async (ctx, ct) =>
             {
+                this.RequiresAuthentication();
+
                 var metaId = (string)this.Request.Form.metaId;
 
                 using (var db = new LiteDatabase(@"Meta.db"))
@@ -158,11 +163,14 @@ namespace TestMetaServer
             Get["/add-instance-meta"] = _ =>
             {
                 this.RequiresAuthentication();
+
                 return View["admin/add-instance-meta"];
             };
 
             Post["/add-instance-meta", runAsync: true] = async (ctx, ct) =>
             {
+                this.RequiresAuthentication();
+
                 var metaId = (string)this.Request.Form.metaId;
                 var name = (string)this.Request.Form.name;
                 var desc = (string)this.Request.Form.description;
@@ -225,6 +233,8 @@ namespace TestMetaServer
 
             Post["/delete-instance-meta", runAsync: true] = async (ctx, ct) =>
             {
+                this.RequiresAuthentication();
+
                 var metaId = (string)this.Request.Form.metaId;
 
                 using (var db = new LiteDatabase(@"Meta.db"))
