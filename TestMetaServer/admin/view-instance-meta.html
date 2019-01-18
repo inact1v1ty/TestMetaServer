@@ -1,0 +1,42 @@
+﻿@Master['master.html']
+
+@Section['Content']
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Meta id</th>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Image</th>
+                <th scope="col">Preview image</th>
+                <th scope="col">Misc</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @Each
+            <tr>
+                <th scope="row">@Current.MetaId</th>
+                <td>@Current.Name</td>
+                <td>@Current.Description</td>
+                <td>
+                    <img style="max-height: 100px" src="../@Current.PictureUrl" />
+                </td>
+                <td>
+                    <img style="max-height: 100px" src="../@Current.PreviewPictureUrl" />
+                </td>
+                <td>
+                    @Current.Misc
+                </td>
+                <td>
+                    <form class="form-inline" action="delete-instance-meta" method="post">
+                        <input type="hidden" name="metaId" value=@Current.MetaId />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            @EndEach
+        </tbody>
+    </table>
+    <a class="btn btn-primary" href=@Path['~/admin/add-instance-meta']>Add</a>
+    @EndSection

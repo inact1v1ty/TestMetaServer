@@ -1,0 +1,32 @@
+﻿@Master['master.html']
+
+@Section['Content']
+<form action="" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="metaId">Meta id</label>
+        <input type="text" class="form-control" id="metaId" name="metaId" placeholder="Enter meta id">
+    </div>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea class="form-control" id="description" name="description" placeholder="Enter description" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+        <input type="file" class="form-control-file" id="iamge" name="image">
+        <label for="image">Choose image</label>
+    </div>
+    <div class="form-group">
+        <input type="file" class="form-control-file" id="previewImage" name="previewImage">
+        <label for="previewImage">Choose image</label>
+    </div>
+    <div class="form-group">
+        <label for="misc">Misc, in json form</label>
+        <textarea class="form-control" id="misc" name="misc" placeholder="Enter misc" rows="5"></textarea>
+    </div>
+    <a class="btn btn-secondary" href=@Path["~/admin/view-class-meta"]>Cancel</a>
+    <button type="submit" class="btn btn-primary">Add</button>
+</form>
+@EndSection
