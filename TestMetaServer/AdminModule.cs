@@ -42,6 +42,27 @@ namespace TestMetaServer
                 return View["admin/index"];
             };
 
+            Get["/settings"] = _ =>
+            {
+                this.RequiresAuthentication();
+
+                return View["admin/settings", Settings.Default.pictureUrlBase];
+            };
+
+            Post["/settings"] = _ =>
+            {
+                this.RequiresAuthentication();
+
+                var newHostUrl = (string)this.Request.Form.hostUrl;
+
+                if (!string.IsNullOrEmpty(newHostUrl))
+                {
+                    Settings.Default.pictureUrlBase = newHostUrl;
+                }
+
+                return this.Context.GetRedirect("~/admin");
+            };
+
             Get["/view-class-meta"] = _ =>
             {
                 this.RequiresAuthentication();
@@ -79,6 +100,11 @@ namespace TestMetaServer
                 var name = (string)this.Request.Form.name;
                 var desc = (string)this.Request.Form.description;
                 var misc = (string)this.Request.Form.misc;
+
+                if (string.IsNullOrEmpty(desc))
+                    desc = "";
+                if (string.IsNullOrEmpty(misc))
+                    misc = "{}";
 
                 var miscDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(misc);
 
@@ -119,7 +145,7 @@ namespace TestMetaServer
                 return this.Context.GetRedirect("~/admin/view-class-meta");
             };
 
-            Post["/delete-class-meta", runAsync: true] = async (ctx, ct) =>
+            Post["/delete-class-meta"] = _ =>
             {
                 this.RequiresAuthentication();
 
@@ -131,7 +157,7 @@ namespace TestMetaServer
 
                     if (!string.IsNullOrEmpty(meta.PictureUrl) && File.Exists(meta.PictureUrl))
                         File.Delete(meta.PictureUrl);
-                    if (!string.IsNullOrEmpty(meta.PreviewPictureUrl) && File.Exists(meta.PictureUrl))
+                    if (!string.IsNullOrEmpty(meta.PreviewPictureUrl) && File.Exists(meta.PreviewPictureUrl))
                         File.Delete(meta.PreviewPictureUrl);
                     db.GetCollection<Meta>("ClassMeta").Delete(metaId);
                 }
@@ -176,6 +202,9 @@ namespace TestMetaServer
                 var desc = (string)this.Request.Form.description;
                 var misc = (string)this.Request.Form.misc;
 
+                if (string.IsNullOrEmpty(misc))
+                    misc = "{}";
+
                 var miscDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(misc);
 
                 bool hasImage = this.Request.Files.Any(file => file.Key == "image");
@@ -196,7 +225,7 @@ namespace TestMetaServer
                             );
                 }
 
-                bool hasPreviewImage = this.Request.Files.Any(file => file.Key == "image");
+                bool hasPreviewImage = this.Request.Files.Any(file => file.Key == "previewImage");
 
                 string previewImageUrl = "";
 
@@ -231,7 +260,7 @@ namespace TestMetaServer
                 return this.Context.GetRedirect("~/admin/view-instance-meta");
             };
 
-            Post["/delete-instance-meta", runAsync: true] = async (ctx, ct) =>
+            Post["/delete-instance-meta"] = _ =>
             {
                 this.RequiresAuthentication();
 
@@ -243,7 +272,7 @@ namespace TestMetaServer
                     
                     if(!string.IsNullOrEmpty(meta.PictureUrl) && File.Exists(meta.PictureUrl))
                         File.Delete(meta.PictureUrl);
-                    if (!string.IsNullOrEmpty(meta.PreviewPictureUrl) && File.Exists(meta.PictureUrl))
+                    if (!string.IsNullOrEmpty(meta.PreviewPictureUrl) && File.Exists(meta.PreviewPictureUrl))
                         File.Delete(meta.PreviewPictureUrl);
                     db.GetCollection<Meta>("InstanceMeta").Delete(metaId);
                 }

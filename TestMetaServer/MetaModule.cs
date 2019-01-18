@@ -29,7 +29,17 @@ namespace TestMetaServer
                 using (var db = new LiteDatabase(@"Meta.db"))
                 {
                     var meta = db.GetCollection<Meta>("ClassMeta").FindById(metaId);
-                    return this.Response.AsJson(meta);
+                    if (meta == null)
+                        return this.Response.AsJson(new { });
+                    var metaForJson = new
+                    {
+                        Name = meta.Name,
+                        Description = meta.Description ?? "",
+                        PictureUrl = Settings.Default.pictureUrlBase + meta.PictureUrl,
+                        PreviewPictureUrl = Settings.Default.pictureUrlBase + meta.PreviewPictureUrl,
+                        Misc = meta.Misc
+                    };
+                    return this.Response.AsJson(metaForJson);
                 }
             };
             Get["/instance-meta/{metaId}"] = parameters =>
@@ -38,7 +48,17 @@ namespace TestMetaServer
                 using (var db = new LiteDatabase(@"Meta.db"))
                 {
                     var meta = db.GetCollection<Meta>("InstanceMeta").FindById(metaId);
-                    return this.Response.AsJson(meta);
+                    if (meta == null)
+                        return this.Response.AsJson(new { });
+                    var metaForJson = new
+                    {
+                        Name = meta.Name,
+                        Description = meta.Description,
+                        PictureUrl = meta.PictureUrl == null ? null : Settings.Default.pictureUrlBase + meta.PictureUrl,
+                        PreviewPictureUrl = meta.PreviewPictureUrl == null ? null : Settings.Default.pictureUrlBase + meta.PreviewPictureUrl,
+                        Misc = meta.Misc
+                    };
+                    return this.Response.AsJson(metaForJson);
                 }
             };
         }

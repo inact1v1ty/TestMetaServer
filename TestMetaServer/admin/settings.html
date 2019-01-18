@@ -1,0 +1,12 @@
+﻿@Master['master.html']
+
+@Section['Content']
+<form action="" method="post">
+    <div class="form-group">
+        <label for="hostUrl">Host url</label>
+        <input type="text" class="form-control" id="hostUrl" name="hostUrl" value=@Model>
+    </div>
+    <a class="btn btn-secondary" href=@Path["~/admin/"]>Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+@EndSection
