@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,13 +20,17 @@ namespace TestMetaServer
 
         static List<Tuple<Guid, string>> users = new List<Tuple<Guid, string>>();
 
-        public IUserIdentity GetUserFromIdentifier(Guid identifier, NancyContext context)
+        public ClaimsPrincipal GetUserFromIdentifier(Guid identifier, NancyContext context)
         {
             var userRecord = users.FirstOrDefault(u => u.Item1 == identifier);
 
             return userRecord == null
                 ? null
-                : new UserIdentity() { UserName = userRecord.Item2 };
+                : new ClaimsPrincipal(new UserIdentity() {
+                    Name = "admin",
+                    IsAuthenticated = true,
+                    AuthenticationType = "Password"
+                    });
         }
 
         public static Guid? ValidateUser(string username, string password)

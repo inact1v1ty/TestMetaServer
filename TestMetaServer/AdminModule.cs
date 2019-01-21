@@ -15,14 +15,14 @@ namespace TestMetaServer
 {
     public class AdminModule : NancyModule
     {
-        public AdminModule() : base("admin")
+        public AdminModule(IRootPathProvider pathProvider) : base("admin")
         {
-            Get["/login"] = _ =>
+            Get("/login", _ =>
             {
                 return View["admin/login"];
-            };
+            });
 
-            Post["/login"] = _ => {
+            Post("/login", _ => {
                 var userGuid = UserMapper.ValidateUser((string)this.Request.Form.login, (string)this.Request.Form.password);
 
                 if (userGuid == null)
@@ -31,25 +31,31 @@ namespace TestMetaServer
                 }
 
                 return this.LoginAndRedirect(userGuid.Value);
-            };
+            });
 
-            Get["/logout"] = _ => {
+            Get("/logout", _ => {
                 return this.LogoutAndRedirect("~/admin");
-            };
+            });
 
-            Get["/"] = _ =>
+            Get("/", _ =>
             {
                 return View["admin/index"];
-            };
+            });
 
-            Get["/settings"] = _ =>
+            Get("/settings", _ =>
             {
                 this.RequiresAuthentication();
+                
+                using(var db = new LiteDatabase("Meta.db"))
+                {
+                    var pictureUrlBase = db.GetCollection<KeyValue>("Settings")
+                        .FindById("pictureUrlBase").Value;
 
-                return View["admin/settings", Settings.Default.pictureUrlBase];
-            };
+                    return View["admin/settings", pictureUrlBase];
+                }
+            });
 
-            Post["/settings"] = _ =>
+            Post("/settings", _ =>
             {
                 this.RequiresAuthentication();
 
@@ -57,13 +63,22 @@ namespace TestMetaServer
 
                 if (!string.IsNullOrEmpty(newHostUrl))
                 {
-                    Settings.Default.pictureUrlBase = newHostUrl;
+                    using(var db = new LiteDatabase(@"Meta.db"))
+                    {
+                        db.GetCollection<KeyValue>("Settings")
+                            .Update("pictureUrlBase",
+                                new KeyValue(){
+                                    Key = "pictureUrlBase",
+                                    Value = newHostUrl
+                                }
+                            );
+                    }
                 }
 
                 return this.Context.GetRedirect("~/admin");
-            };
+            });
 
-            Get["/view-class-meta"] = _ =>
+            Get("/view-class-meta", _ =>
             {
                 this.RequiresAuthentication();
 
@@ -83,16 +98,16 @@ namespace TestMetaServer
                     );
                     return View["admin/view-class-meta", viewMeta];
                 }
-            };
+            });
 
-            Get["/add-class-meta"] = _ =>
+            Get("/add-class-meta", _ =>
             {
                 this.RequiresAuthentication();
 
                 return View["admin/add-class-meta"];
-            };
+            });
 
-            Post["/add-class-meta", runAsync:true] = async (ctx, ct) =>
+            Post("/add-class-meta", async (ctx, ct) =>
             {
                 this.RequiresAuthentication();
 
@@ -109,7 +124,8 @@ namespace TestMetaServer
                 var miscDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(misc);
 
                 var imageUrl = this.Request.Url.BasePath +
-                    await HandleUpload(
+                    await HandleUploadAsync(
+                        pathProvider,
                         metaId,
                         this.Request.Files.First(file => file.Key == "image").Name.Substring(
                             this.Request.Files.First(file => file.Key == "image").Name.LastIndexOf('.')
@@ -119,7 +135,8 @@ namespace TestMetaServer
                         false
                         );
                 var previewImageUrl = this.Request.Url.BasePath +
-                    await HandleUpload(
+                    await HandleUploadAsync(
+                        pathProvider,
                         metaId,
                         this.Request.Files.First(file => file.Key == "previewImage").Name.Substring(
                             this.Request.Files.First(file => file.Key == "previewImage").Name.LastIndexOf('.')
@@ -143,9 +160,9 @@ namespace TestMetaServer
                             );
                 }
                 return this.Context.GetRedirect("~/admin/view-class-meta");
-            };
+            });
 
-            Post["/delete-class-meta"] = _ =>
+            Post("/delete-class-meta", _ =>
             {
                 this.RequiresAuthentication();
 
@@ -162,9 +179,9 @@ namespace TestMetaServer
                     db.GetCollection<Meta>("ClassMeta").Delete(metaId);
                 }
                 return this.Context.GetRedirect("~/admin/view-class-meta");
-            };
+            });
 
-            Get["/view-instance-meta"] = _ =>
+            Get("/view-instance-meta", _ =>
             {
                 this.RequiresAuthentication();
 
@@ -184,16 +201,16 @@ namespace TestMetaServer
                     );
                     return View["admin/view-instance-meta", viewMeta];
                 }
-            };
+            });
 
-            Get["/add-instance-meta"] = _ =>
+            Get("/add-instance-meta", _ =>
             {
                 this.RequiresAuthentication();
 
                 return View["admin/add-instance-meta"];
-            };
+            });
 
-            Post["/add-instance-meta", runAsync: true] = async (ctx, ct) =>
+            Post("/add-instance-meta", async (ctx, ct) =>
             {
                 this.RequiresAuthentication();
 
@@ -214,7 +231,8 @@ namespace TestMetaServer
                 if (hasImage)
                 {
                     imageUrl = this.Request.Url.BasePath +
-                        await HandleUpload(
+                        await HandleUploadAsync(
+                            pathProvider,
                             metaId,
                             this.Request.Files.First(file => file.Key == "image").Name.Substring(
                                 this.Request.Files.First(file => file.Key == "image").Name.LastIndexOf('.')
@@ -232,7 +250,8 @@ namespace TestMetaServer
                 if (hasPreviewImage)
                 {
                     previewImageUrl = this.Request.Url.BasePath +
-                        await HandleUpload(
+                        await HandleUploadAsync(
+                            pathProvider,
                             metaId,
                             this.Request.Files.First(file => file.Key == "previewImage").Name.Substring(
                                 this.Request.Files.First(file => file.Key == "previewImage").Name.LastIndexOf('.')
@@ -258,9 +277,9 @@ namespace TestMetaServer
                             );
                 }
                 return this.Context.GetRedirect("~/admin/view-instance-meta");
-            };
+            });
 
-            Post["/delete-instance-meta"] = _ =>
+            Post("/delete-instance-meta", _ =>
             {
                 this.RequiresAuthentication();
 
@@ -277,16 +296,17 @@ namespace TestMetaServer
                     db.GetCollection<Meta>("InstanceMeta").Delete(metaId);
                 }
                 return this.Context.GetRedirect("~/admin/view-instance-meta");
-            };
+            });
         }
 
-        public async Task<string> HandleUpload(string fileName, string ext, Stream stream, bool instance, bool preview)
+        public async Task<string> HandleUploadAsync(IRootPathProvider pathProvider, string fileName, string ext, Stream stream, bool instance, bool preview)
         {
-            var targetFile = "images/" + (instance ? "instance" : "class");
+            var targetFile = Path.Combine("images", (instance ? "instance" : "class"));
             if (preview)
-                targetFile = targetFile + "/preview";
-            targetFile = targetFile + "/" + fileName + ext;
-            using (FileStream destinationStream = File.Create(targetFile))
+                targetFile = Path.Combine(targetFile, "preview");
+            targetFile = Path.Combine(targetFile, fileName + ext);
+            var absolutePath = Path.Combine(pathProvider.GetRootPath(), targetFile);
+            using (FileStream destinationStream = File.Create(absolutePath))
             {
                 await stream.CopyToAsync(destinationStream);
             }

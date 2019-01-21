@@ -1,12 +1,12 @@
-FROM microsoft/dotnet-framework:4.7.2-sdk AS build
+FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /app
 
 # Expose the ports
-EXPOSE 80
+EXPOSE 5000
 EXPOSE 443
 
 # Run restore
-COPY TestMetaServer.sln .
+COPY *.sln .
 COPY TestMetaServer/*.csproj ./TestMetaServer/
 RUN dotnet restore
 
@@ -21,7 +21,7 @@ WORKDIR /app/TestMetaServer
 RUN dotnet publish -c Release -o out
 
 # Run the server
-FROM microsoft/dotnet-framework:4.7.2-runtime AS runtime
+FROM microsoft/dotnet:2.2-aspnetcore-runtime AS runtime
 WORKDIR /app
 COPY --from=publish /app/TestMetaServer/out ./
-ENTRYPOINT ["TestMetaServer.exe"]
+ENTRYPOINT ["dotnet", "TestMetaServer.dll"]
