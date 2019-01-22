@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using LiteDB;
@@ -70,6 +71,24 @@ namespace TestMetaServer
                                 new KeyValue(){
                                     Key = "pictureUrlBase",
                                     Value = newHostUrl
+                                }
+                            );
+                    }
+                }
+
+                var newPassword = (string)this.Request.Form.password;
+
+                if (!string.IsNullOrEmpty(newPassword))
+                {
+                    var sha512 = SHA512.Create();
+                    var hash = sha512.ComputeHash(Encoding.UTF8.GetBytes(newPassword));
+                    using(var db = new LiteDatabase(@"Meta.db"))
+                    {
+                        db.GetCollection<KeyValue>("Settings")
+                            .Update("password",
+                                new KeyValue(){
+                                    Key = "password",
+                                    Value = UserMapper.ByteArrayToString(hash)
                                 }
                             );
                     }

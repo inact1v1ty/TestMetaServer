@@ -23,6 +23,13 @@ namespace TestMetaServer
                         Value = "localhost:5000/"
                     });
                 }
+                if(c.FindById("password") == null) {
+                    c.Upsert("password",
+                    new KeyValue(){
+                        Key = "password",
+                        Value = UserMapper.DefaultPassword
+                    });
+                }
             }
 
             CreateFolders();
