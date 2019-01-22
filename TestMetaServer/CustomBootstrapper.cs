@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy;
 using Nancy.Authentication.Forms;
 using Nancy.Bootstrapper;
+using Nancy.Configuration;
 using Nancy.Conventions;
 using Nancy.TinyIoc;
 
@@ -16,7 +18,6 @@ namespace TestMetaServer
         protected override void ConfigureConventions(NancyConventions conventions)
         {
             base.ConfigureConventions(conventions);
-
             conventions.StaticContentsConventions.Add(
                 StaticContentConventionBuilder.AddDirectory("images", @"images")
             );
@@ -36,6 +37,11 @@ namespace TestMetaServer
             // As this is now per-request we could inject a request scoped
             // database "context" or other request scoped services.
             container.Register<IUserMapper, UserMapper>();
+        }
+
+        public override void Configure(INancyEnvironment environment)
+        {
+            environment.Tracing(enabled: true, displayErrorTraces: true);
         }
 
         protected override void RequestStartup(TinyIoCContainer requestContainer, IPipelines pipelines, NancyContext context)

@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy.Security;
 
 namespace TestMetaServer
 {
-    public class UserIdentity : IUserIdentity
+    public class UserIdentity : IIdentity
     {
-        public string UserName { get; set; }
 
-        public IEnumerable<string> Claims { get; set; }
+        public string AuthenticationType { get; set; }
+
+        public bool IsAuthenticated { get; set; }
+
+        public string Name { get; set; }
     }
 }

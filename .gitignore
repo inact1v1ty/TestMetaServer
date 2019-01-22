@@ -339,3 +339,10 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database 
 healthchecksdb
+
+# Visual Studio Code
+.vscode/
+
+# Server static files
+images/
+*.db
