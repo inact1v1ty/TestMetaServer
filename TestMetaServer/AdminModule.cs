@@ -11,6 +11,7 @@ using Nancy.Authentication.Forms;
 using Nancy.Extensions;
 using Nancy.Json;
 using Nancy.Security;
+using Newtonsoft.Json;
 
 namespace TestMetaServer
 {
@@ -46,7 +47,7 @@ namespace TestMetaServer
             Get("/settings", _ =>
             {
                 this.RequiresAuthentication();
-                
+
                 using(var db = new LiteDatabase("Meta.db"))
                 {
                     var pictureUrlBase = db.GetCollection<KeyValue>("Settings")
@@ -135,13 +136,20 @@ namespace TestMetaServer
                 var desc = (string)this.Request.Form.description;
                 var misc = (string)this.Request.Form.misc;
 
+                Console.Write(misc);
+
                 if (string.IsNullOrEmpty(desc))
                     desc = "";
                 if (string.IsNullOrEmpty(misc))
                     misc = "{}";
 
-                var miscDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(misc);
+                Console.WriteLine(misc);
 
+                Dictionary<string, string> miscDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(misc);
+                foreach (var pair in miscDecoded)
+                {
+                    Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
+                }
                 var imageUrl = this.Request.Url.BasePath +
                     await HandleUploadAsync(
                         pathProvider,
@@ -307,7 +315,7 @@ namespace TestMetaServer
                 using (var db = new LiteDatabase(@"Meta.db"))
                 {
                     var meta = db.GetCollection<Meta>("InstanceMeta").FindById(metaId);
-                    
+
                     if(!string.IsNullOrEmpty(meta.PictureUrl) && File.Exists(meta.PictureUrl))
                         File.Delete(meta.PictureUrl);
                     if (!string.IsNullOrEmpty(meta.PreviewPictureUrl) && File.Exists(meta.PreviewPictureUrl))
