@@ -16,7 +16,7 @@ namespace TestMetaServer
         public string Description { get; set; }
         public string PictureUrl { get; set; }
         public string PreviewPictureUrl { get; set; }
-        public Dictionary<string, string> Misc { get; set; }
+        public Dictionary<string, List<string>> Misc { get; set; }
     }
 
     public class MetaModule : NancyModule

@@ -145,7 +145,7 @@ namespace TestMetaServer
 
                 Console.WriteLine(misc);
 
-                Dictionary<string, string> miscDecoded = JsonConvert.DeserializeObject<Dictionary<string, string>>(misc);
+                Dictionary<string, List<string>> miscDecoded = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(misc);
                 foreach (var pair in miscDecoded)
                 {
                     Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
@@ -249,7 +249,7 @@ namespace TestMetaServer
                 if (string.IsNullOrEmpty(misc))
                     misc = "{}";
 
-                var miscDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(misc);
+                var miscDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, List<string>>>(misc);
 
                 bool hasImage = this.Request.Files.Any(file => file.Key == "image");
 
