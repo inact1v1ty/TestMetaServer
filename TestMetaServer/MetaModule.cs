@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Nancy;
 using LiteDB;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace TestMetaServer
 {
@@ -16,7 +18,7 @@ namespace TestMetaServer
         public string Description { get; set; }
         public string PictureUrl { get; set; }
         public string PreviewPictureUrl { get; set; }
-        public Dictionary<string, List<string>> Misc { get; set; }
+        public Dictionary<string, List<string>> Tags { get; set; }
     }
 
     public class MetaModule : NancyModule
@@ -39,9 +41,16 @@ namespace TestMetaServer
                         Description = meta.Description ?? "",
                         PictureUrl = pictureUrlBase + meta.PictureUrl,
                         PreviewPictureUrl = pictureUrlBase + meta.PreviewPictureUrl,
-                        Misc = meta.Misc
+                        Tags = meta.Tags
                     };
-                    return this.Response.AsJson(metaForJson);
+                    return this.Response.AsText(
+                        JsonConvert.SerializeObject(metaForJson,
+                        Formatting.None,
+                        new JsonSerializerSettings
+                        {
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        }),
+                        "application/json");
                 }
             });
             Get("/instance-meta/{metaId}", parameters =>
@@ -60,9 +69,16 @@ namespace TestMetaServer
                         Description = meta.Description,
                         PictureUrl = meta.PictureUrl == null ? null : pictureUrlBase + meta.PictureUrl,
                         PreviewPictureUrl = meta.PreviewPictureUrl == null ? null : pictureUrlBase + meta.PreviewPictureUrl,
-                        Misc = meta.Misc
+                        Tags = meta.Tags
                     };
-                    return this.Response.AsJson(metaForJson);
+                    return this.Response.AsText(
+                        JsonConvert.SerializeObject(metaForJson,
+                        Formatting.None,
+                        new JsonSerializerSettings
+                        {
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        }),
+                        "application/json");
                 }
             });
         }

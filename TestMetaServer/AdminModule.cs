@@ -113,7 +113,7 @@ namespace TestMetaServer
                             Description = metai.Description,
                             PictureUrl = metai.PictureUrl,
                             PreviewPictureUrl = metai.PreviewPictureUrl,
-                            Misc = new JavaScriptSerializer().Serialize(metai.Misc)
+                            Tags = JsonConvert.SerializeObject(metai.Tags)
                         }
                     );
                     return View["admin/view-class-meta", viewMeta];
@@ -134,22 +134,15 @@ namespace TestMetaServer
                 var metaId = (string)this.Request.Form.metaId;
                 var name = (string)this.Request.Form.name;
                 var desc = (string)this.Request.Form.description;
-                var misc = (string)this.Request.Form.misc;
-
-                Console.Write(misc);
+                var tags = (string)this.Request.Form.tags;
 
                 if (string.IsNullOrEmpty(desc))
                     desc = "";
-                if (string.IsNullOrEmpty(misc))
-                    misc = "{}";
+                if (string.IsNullOrEmpty(tags))
+                    tags = "{}";
 
-                Console.WriteLine(misc);
+                Dictionary<string, List<string>> tagsDecoded = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(tags);
 
-                Dictionary<string, List<string>> miscDecoded = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(misc);
-                foreach (var pair in miscDecoded)
-                {
-                    Console.WriteLine("{0}: {1}", pair.Key, pair.Value);
-                }
                 var imageUrl = this.Request.Url.BasePath +
                     await HandleUploadAsync(
                         pathProvider,
@@ -182,7 +175,7 @@ namespace TestMetaServer
                                 Description = desc,
                                 PictureUrl = imageUrl,
                                 PreviewPictureUrl = previewImageUrl,
-                                Misc = miscDecoded
+                                Tags = tagsDecoded
                             }
                             );
                 }
@@ -223,7 +216,7 @@ namespace TestMetaServer
                             Description = metai.Description,
                             PictureUrl = metai.PictureUrl,
                             PreviewPictureUrl = metai.PreviewPictureUrl,
-                            Misc = new JavaScriptSerializer().Serialize(metai.Misc)
+                            Tags = JsonConvert.SerializeObject(metai.Tags)
                         }
                     );
                     return View["admin/view-instance-meta", viewMeta];
@@ -244,12 +237,12 @@ namespace TestMetaServer
                 var metaId = (string)this.Request.Form.metaId;
                 var name = (string)this.Request.Form.name;
                 var desc = (string)this.Request.Form.description;
-                var misc = (string)this.Request.Form.misc;
+                var tags = (string)this.Request.Form.tags;
 
-                if (string.IsNullOrEmpty(misc))
-                    misc = "{}";
+                if (string.IsNullOrEmpty(tags))
+                    tags = "{}";
 
-                var miscDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, List<string>>>(misc);
+                var tagsDecoded = new JavaScriptSerializer().Deserialize<Dictionary<string, List<string>>>(tags);
 
                 bool hasImage = this.Request.Files.Any(file => file.Key == "image");
 
@@ -299,7 +292,7 @@ namespace TestMetaServer
                                 Description = string.IsNullOrEmpty(desc) ? null : desc,
                                 PictureUrl = string.IsNullOrEmpty(imageUrl) ? null : imageUrl,
                                 PreviewPictureUrl = string.IsNullOrEmpty(previewImageUrl) ? null : previewImageUrl,
-                                Misc = miscDecoded
+                                Tags = tagsDecoded
                             }
                             );
                 }
